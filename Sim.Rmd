@@ -1,0 +1,249 @@
+---
+title: "SimulationStuff"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#load("SimulationData.RData")   I'm dumb and made an error in the code. I ran the simulation
+#again and will load the new data here
+load("SimulationData2.RData")
+```
+
+Ran simulation contained in the code FM_sim.R. It runs 100 simulations each at 6 levels of frequency modulation. In each of these simulations, four F statistics are computed: two (called F1 and F2) from Dave's Fortran code, the one from the paper (FP) and the usual Harmonic F statistic.
+
+The level of FM is determined by a parameter fbw (fraction of bandwidth, W) so that the modulating polynomial inside of the complex exponential (I'll change this to a real-valued signal at some point) is a quadratic that goes from f - fbw * W to f + fbw * W and back again (f being the center frequency - here f = 0.2). The six levels of modulation used are 0, 0.2, 0.4, 0.6, 0.8 and 1. The (max) degree of the estimated polynomial is 6. The simulation code is documented (possibly poorly) and should hopefully not be too hard to follow if where the plots and stuff come from is not as clear as I think it is. Now here are a bunch of results.
+
+
+
+First of all, lets see how accurate (right word?) these statistics are by looking at the counter matrices. These matrices keep track of how often (out of 100) each F statistic had a maximum above a critical F statistic with level of significance 1 - 1/ndata that was also within the band (f-W, f+W). Each row represents a level of FM (increasing from 0 to 1 as above) and each column represents the degree (0 through 6) of the estimated polynomial being used in the computation.
+
+```{r}
+Fcounterlist
+```
+First of all, we see that the regular F statistic completely missed at all of the levels of FM (though it should have worked at fbw = 0. I need to look into this.). This one was only computed by varying FM and has nothing to do with the degree of the estimated polynomial, so it is only a vector.
+
+```{r}
+F1countermatrix
+```
+Here we see that as the degree and level of modulation increase the performance of the F1 statistic decreases. It seems good to me that as the degree increases away from the 'correct' degree, the F1 statistic misses the center frequency, though I would be happier if the degree 2 one did better in the presence of 'high' (?) FM.
+
+```{r}
+F2countermatrix
+```
+This one (the 'time domain' F2 statistic) looks very similar to the one for F1. In fact,
+```{r}
+F2countermatrix - F1countermatrix
+```
+it might be marginally better since it isn't picking up high F values at 'incorrect' degrees as often as F1.
+```{r}
+FPcountermatrix
+```
+Rough. This one (from the paper) really seems to suck with higher FM. It also gives more false positives at the wrong degree than the others. Maybe it just sucks all round or maybe I've coded it incorrectly. EDIT: I have found an error. I was dividing by P+1 in the numerator by accident instead of P.
+
+Now we can check the sums of the F statistics across the band (f-W, f+W). These are stored in arrays (degree by fbw by simulation) so they are slightly harder to look at and compare. I also don't really know what to make of these sums. I think F1 and F2 should be pretty close, but how close is close?
+
+```{r}
+F1bandtotal[3,4,32]
+F2bandtotal[3,4,32]
+FPbandtotal[3,4,32]
+Fbandtotal[4,32]
+```
+Well, on these arbitraily selected indices F1 and F2 are close and FP and F are close (EDIT: Not after fixing that error). Or rather, the two pairs are each in the same general neighbourhood.
+```{r}
+F1bandtotal[5,6,79]
+F2bandtotal[5,6,79]
+FPbandtotal[5,6,79]
+Fbandtotal[6,79]
+```
+Again, F1 and F2 are sort of (it's a bit of a stretch) in the same neighbourhood and so are FP and F. I'm honestly not 100% sure what I should be looking for or what behaviour I should be expecting with this. 
+```{r}
+F1bandtotal[5,1,12]
+F2bandtotal[5,1,12]
+FPbandtotal[5,1,12]
+Fbandtotal[1,12]
+
+F1bandtotal[3,1,12]
+F2bandtotal[3,1,12]
+FPbandtotal[3,1,12]
+Fbandtotal[1,12]
+
+F1bandtotal[3,6,12]
+F2bandtotal[3,6,12]
+FPbandtotal[3,6,12]
+Fbandtotal[6,12]
+```
+Well it seems like there's maybe something going on here. 
+
+I'm not really sure what to do with this stuff, so I'm going to put up some plots now instead.
+I'll start with the quantiles.
+```{r}
+plot(freq,F1quant[3,,3,1], type = 'l', xlab = 'Frequency', ylab = 'F1')
+title("Degree = 2, fbw = 0.4, 2nd Quantile")
+
+plot(freq,F2quant[3,,3,1], type = 'l', xlab = 'Frequency', ylab = 'F2')
+title("Degree = 2, fbw = 0.4, 2nd Quantile")
+
+plot(freq,FPquant[3,,3,1], type = 'l', xlab = 'Frequency', ylab = 'FP')
+title("Degree = 2, fbw = 0.4, 2nd Quantile")
+
+plot(freq,F1quant[3,,3,2], type = 'l', xlab = 'Frequency', ylab = 'F1')
+title("Degree = 2, fbw = 0.4, 50th Quantile")
+
+plot(freq,F2quant[3,,3,2], type = 'l', xlab = 'Frequency', ylab = 'F2')
+title("Degree = 2, fbw = 0.4, 50th Quantile")
+
+plot(freq,FPquant[3,,3,2], type = 'l', xlab = 'Frequency', ylab = 'FP')
+title("Degree = 2, fbw = 0.4, 50th Quantile")
+
+plot(freq,F1quant[3,,3,3], type = 'l', xlab = 'Frequency', ylab = 'F1')
+title("Degree = 2, fbw = 0.4, 98th Quantile")
+
+plot(freq,F2quant[3,,3,3], type = 'l', xlab = 'Frequency', ylab = 'F2')
+title("Degree = 2, fbw = 0.4, 98th Quantile")
+
+plot(freq,FPquant[3,,3,3], type = 'l', xlab = 'Frequency', ylab = 'FP')
+title("Degree = 2, fbw = 0.4, 98th Quantile")
+```
+This is in moderate (?) FM and the proper degree. What happens at the proper degree but high modulation?
+```{r}
+plot(freq,F1quant[3,,6,1], type = 'l', xlab = 'Frequency', ylab = 'F1')
+title("Degree = 2, fbw = 1, 2nd Quantile")
+
+plot(freq,F2quant[3,,6,1], type = 'l', xlab = 'Frequency', ylab = 'F2')
+title("Degree = 2, fbw = 1, 2nd Quantile")
+
+plot(freq,FPquant[3,,6,1], type = 'l', xlab = 'Frequency', ylab = 'FP')
+title("Degree = 2, fbw = 1, 2nd Quantile")
+
+plot(freq,F1quant[3,,6,2], type = 'l', xlab = 'Frequency', ylab = 'F1')
+title("Degree = 2, fbw = 1, 50th Quantile")
+
+plot(freq,F2quant[3,,6,2], type = 'l', xlab = 'Frequency', ylab = 'F2')
+title("Degree = 2, fbw = 1, 50th Quantile")
+
+plot(freq,FPquant[3,,6,2], type = 'l', xlab = 'Frequency', ylab = 'FP')
+title("Degree = 2, fbw = 1, 50th Quantile")
+
+plot(freq,F1quant[3,,6,3], type = 'l', xlab = 'Frequency', ylab = 'F1')
+title("Degree = 2, fbw = 1, 98th Quantile")
+
+plot(freq,F2quant[3,,6,3], type = 'l', xlab = 'Frequency', ylab = 'F2')
+title("Degree = 2, fbw = 1, 98th Quantile")
+
+plot(freq,FPquant[3,,6,3], type = 'l', xlab = 'Frequency', ylab = 'FP')
+title("Degree = 2, fbw = 1, 98th Quantile")
+```
+It looks pretty similar, but the peaks are a bit shorter. 
+What about away from the true degree in high modulation?
+```{r}
+plot(freq,F1quant[7,,6,1], type = 'l', xlab = 'Frequency', ylab = 'F1')
+title("Degree = 6, fbw = 1, 2nd Quantile")
+
+plot(freq,F2quant[7,,6,1], type = 'l', xlab = 'Frequency', ylab = 'F2')
+title("Degree = 6, fbw = 1, 2nd Quantile")
+
+plot(freq,FPquant[7,,6,1], type = 'l', xlab = 'Frequency', ylab = 'FP')
+title("Degree = 6, fbw = 1, 2nd Quantile")
+
+plot(freq,F1quant[7,,6,2], type = 'l', xlab = 'Frequency', ylab = 'F1')
+title("Degree = 6, fbw = 1, 50th Quantile")
+
+plot(freq,F2quant[7,,6,2], type = 'l', xlab = 'Frequency', ylab = 'F2')
+title("Degree = 6, fbw = 1, 50th Quantile")
+
+plot(freq,FPquant[7,,6,2], type = 'l', xlab = 'Frequency', ylab = 'FP')
+title("Degree = 6, fbw = 1, 50th Quantile")
+
+plot(freq,F1quant[7,,6,3], type = 'l', xlab = 'Frequency', ylab = 'F1')
+title("Degree = 6, fbw = 1, 98th Quantile")
+
+plot(freq,F2quant[7,,6,3], type = 'l', xlab = 'Frequency', ylab = 'F2')
+title("Degree = 6, fbw = 1, 98th Quantile")
+
+plot(freq,FPquant[7,,6,3], type = 'l', xlab = 'Frequency', ylab = 'FP')
+title("Degree = 6, fbw = 1, 98th Quantile")
+```
+Now let's see the distribution of these F statistics at the center frequency and away from it as well as at the correct degree and away from it.
+
+```{r}
+cfi <- which.min(abs(f - freq)) #center frequency index
+plot(F1sort[3, cfi, 3,], type = 'h', xlab = '', ylab = 'F1')
+title("Degree = 2, freq = 0.2, fbw = 0.4")
+
+hist(F1sort[3,cfi,3,], breaks = 15)
+
+plot(F2sort[3, cfi, 3,], type = 'h', xlab = '', ylab = 'F2')
+title("Degree = 2, freq = 0.2, fbw = 0.4")
+
+hist(F2sort[3,cfi,3,], breaks = 15)
+
+plot(FPsort[3, cfi, 3,], type = 'h', xlab = '', ylab = 'FP')
+title("Degree = 2, freq = 0.2, fbw = 0.4")
+
+hist(FPsort[3,cfi,3,], breaks = 15)
+```
+
+```{r}
+ofi <- which.min(abs(-0.1 - freq)) #other frequency index
+plot(F1sort[3,ofi,3,], type = 'h', xlab = '', ylab = 'F1')
+title("Degree = 2, freq = -0.1, fbw = 0.4")
+hist(F1sort[3,ofi,3,], breaks = 20)
+
+plot(F2sort[3,ofi,3,], type = 'h', xlab = '', ylab = 'F2')
+title("Degree = 2, freq = -0.1, fbw = 0.4")
+hist(F2sort[3,ofi,3,], breaks = 20)
+
+plot(FPsort[3,ofi,3,], type = 'h', xlab = '', ylab = 'FP')
+title("Degree = 2, freq = -0.1, fbw = 0.4")
+hist(FPsort[3,ofi,3,], breaks = 20)
+
+plot(density(F1sort[3,ofi,3,]), type = 'l')
+plot(density(F2sort[3,ofi,3,]), type = 'l')
+
+plot(density(FPsort[3,ofi,3,]), type = 'l')
+plot(seq(0,5,length.out=100),df(seq(0,5,length.out = 100), df1 = 2*3, df2 = 2*(nord-3)), type = 'l', ylab = '', xlab = '')
+title("Theoretical density of F(2*3, 2*(10-3)) random variable")
+```
+FP actually looks like an F distribution. The other two don't as much. At least they don't look like the F distribution with the proper degrees of freedom, 2P and 2(K-P), where P = degree + 1.
+
+
+
+
+Can also plot the averaged F statistics or individual ones. In the averaged F stats, eg. F1ave, the first index is level of modulation, the second is degree (+1) and the third is frequency (index 1 being -0.5 and index nFFT being slightly less than 0.5). For the array of unaveraged F stats, the indices go: Degree + 1, frequency, level of modulation, simulation number (out of 100). I also included the critical F value as a dashed red line.
+```{r}
+plot(freq, F1ave[5,3,], type = 'l', xlab = 'Frequency', ylab = 'F1')
+abline(h=qf(1-1/ndata,2*3,2*(nord-3)), lty = 2, col = 2)
+plot(freq, F2ave[5,3,], type = 'l', xlab = 'Frequency', ylab = 'F2')
+abline(h=qf(1-1/ndata,2*3,2*(nord-3)), lty = 2, col = 2)
+plot(freq, FPave[5,3,], type = 'l', xlab = 'Frequency', ylab = 'FP')
+abline(h=qf(1-1/ndata,2*3,2*(nord-3)), lty = 2, col = 2)
+```
+There are peaks where there should be peaks (roughly) and flat stuff where there should be flat stuff, but only the F1 and F2 are significant enough on average (if that means anything). 
+```{r}
+plot(freq, F1ave[5,6,], type = 'l', xlab = 'Frequency', ylab = 'F1')
+abline(h=qf(1-1/ndata,2*6,2*(nord-6)), lty = 2, col = 2)
+plot(freq, F2ave[5,6,], type = 'l', xlab = 'Frequency', ylab = 'F2')
+abline(h=qf(1-1/ndata,2*6,2*(nord-6)), lty = 2, col = 2)
+plot(freq, FPave[5,6,], type = 'l', xlab = 'Frequency', ylab = 'FP')
+abline(h=qf(1-1/ndata,2*6,2*(nord-6)), lty = 2, col = 2)
+```
+This is what it looks like at a higher degree polynomial (in this case degree = 5). I was hoping that the spike would be lower and when I was doing it with just the one frequency at a time I swear it was (but those may have just been the few small ones that show up while it is large on average). Still, it's noisier (or something) and there is a second smaller peak at a different frequency. There is probably a way of using all the degrees together over blocks or something to determine what degree polynomial to use and what center frequency is present. 
+
+```{r}
+sim.ind <- 27
+plot(freq, F1array[1,,1,sim.ind], type = 'l', xlab = 'Frequency', ylab = 'F1')
+abline(h=qf(1-1/ndata, 2*1, 2*(nord-1)), lty = 2, col = 2)
+
+plot(freq, F2array[1,,1,sim.ind], type = 'l', xlab = 'Frequency', ylab = 'F2')
+abline(h=qf(1-1/ndata, 2*1, 2*(nord-1)), lty = 2, col = 2)
+
+plot(freq, FParray[1,,1,sim.ind], type = 'l', xlab = 'Frequency', ylab = 'FP')
+abline(h=qf(1-1/ndata, 2*1, 2*(nord-1)), lty = 2, col = 2)
+
+plot(freq, Farray[,1,sim.ind], type = 'l', xlab = 'Frequency', ylab = 'F')
+abline(h=qf(1-1/ndata, 2*1, 2*(nord-1)), lty = 2, col = 2)
+```
+This is for degree 0 with no frequency modulation. I guess there's just enough noise present that the regular F statistic isn't doing so great. Still, I feel like it should be doing better. I need to check this. F1 and F2 are promising, but FP is less so.
