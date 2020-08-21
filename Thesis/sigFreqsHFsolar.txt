@@ -1,0 +1,90 @@
+------------------------
+NW =  5 
+Significant frequencies in microhertz of HF at the  0.999996831191219 level: 
+[1] "NA"
+
+------------------------
+NW =  5.5 
+Significant frequencies in microhertz of HF at the  0.999996831191219 level: 
+[1] "NA"
+
+------------------------
+NW =  6 
+Significant frequencies in microhertz of HF at the  0.999996831191219 level: 
+[1] "NA"
+
+------------------------
+NW =  6.5 
+Significant frequencies in microhertz of HF at the  0.999996831191219 level: 
+[1] "NA"
+
+------------------------
+NW =  7 
+Significant frequencies in microhertz of HF at the  0.999996831191219 level: 
+[1] "NA"
+
+------------------------
+NW =  7.5 
+Significant frequencies in microhertz of HF at the  0.999996831191219 level: 
+[1] 2307.341
+
+[1] 23.48126
+Relevant quantile:  22.4698909903916 
+
+------------------------
+NW =  8 
+Significant frequencies in microhertz of HF at the  0.999996831191219 level: 
+[1] 1927.800 2951.076
+
+[1] 21.47761 22.12847
+Relevant quantile:  21.4311358403041 
+
+------------------------
+NW =  8.5 
+Significant frequencies in microhertz of HF at the  0.999996831191219 level: 
+[1] 2759.290 2951.076 3668.964
+
+[1] 21.79751 23.43455 21.29164
+Relevant quantile:  20.5876596030907 
+
+------------------------
+NW =  9 
+Significant frequencies in microhertz of HF at the  0.999996831191219 level: 
+[1] 2095.802 2759.287 3305.480 3668.964
+
+[1] 23.53853 20.34956 20.42285 22.56479
+Relevant quantile:  19.8897767233159 
+
+------------------------
+NW =  9.5 
+Significant frequencies in microhertz of HF at the  0.999996831191219 level: 
+[1] 3305.480 3668.964 4120.796
+
+[1] 19.57321 23.80084 20.41732
+Relevant quantile:  19.3031924827608 
+
+------------------------
+NW =  10 
+Significant frequencies in microhertz of HF at the  0.999996831191219 level: 
+[1] 3668.964 4120.796
+
+[1] 21.96633 20.07149
+Relevant quantile:  18.803511689954 
+
+------------------------
+NW =  10.5 
+Significant frequencies in microhertz of HF at the  0.999996831191219 level: 
+[1] 3305.478 4120.796
+
+[1] 19.03905 20.73136
+Relevant quantile:  18.3729295186029 
+
+------------------------
+NW =  11 
+Significant frequencies in microhertz of HF at the  0.999996831191219 level: 
+[1] 3305.48
+
+[1] 19.99758
+Relevant quantile:  17.9981599449428 
+
+------------------------
